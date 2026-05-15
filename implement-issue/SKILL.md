@@ -6,7 +6,7 @@ argument-hint: 'Path to .plans/ issue file, or issue number (e.g. 014)'
 
 # Implement Issue
 
-Execute a `.plans/` issue file end-to-end: read the spec, implement changes, run tests, and mark the issue complete.
+Execute a `.plans/` issue file end-to-end: read the spec, implement changes, run tests, mark the issue complete, update the parent plan, and commit.
 
 ## Process
 
@@ -14,7 +14,7 @@ Execute a `.plans/` issue file end-to-end: read the spec, implement changes, run
 
 Resolve the issue file:
 - If the user passes a path → read it directly.
-- If the user passes a number (e.g. `014`) → find the matching `NNN_*.md` file in the nearest `.plans/issues/` directory.
+- If the user passes a number (e.g. `014`) → find the matching `NNN_*.md` file in the nearest `.plans/` subdirectory (check both `issues/` and plan-named dirs).
 - If ambiguous → ask.
 
 Read the full issue. Extract:
@@ -23,19 +23,21 @@ Read the full issue. Extract:
 - **Hard Invariants** (constraints that must never be violated)
 - **Blocked by** (prerequisites — abort if unmet)
 - **Test scenario** (verification steps)
+- **Type** (`AFK` or `HITL`)
 
 ### 2. Check prerequisites
 
 If the issue has a **Blocked by** entry that is not marked complete, warn the user and ask whether to proceed anyway. For `AFK` issues, abort unless the user overrides.
 
-### 3. Plan implementation order
+### 3. Explore and plan implementation order
 
-Use subagents to explore each file listed in **Files to modify**. Then decide on an implementation order that:
+Use subagents or file reads to explore each file listed in **Files to modify**. Then decide on an implementation order that:
 - Starts with the lowest-dependency changes (types, data structures).
 - Moves to producers, then consumers.
 - Ends with test updates.
 
-Present the implementation order to the user as a numbered todo list. Wait for approval before proceeding. If the issue is `AFK` type, proceed without approval.
+**AFK issues:** Proceed directly — do not ask for approval.
+**HITL issues:** Present the implementation order and wait for approval.
 
 ### 4. Implement — one acceptance criterion at a time
 
@@ -44,7 +46,7 @@ For each acceptance criterion:
 1. **Mark the todo in-progress.**
 2. **Read the relevant files** to understand current state.
 3. **Make the code changes.** Follow the issue's spec closely — do not add unrequested features or refactors.
-4. **Run the relevant tests** to check nothing is broken. If the issue specifies a test file, run that. Otherwise run the project's default test command.
+4. **Run the relevant tests** (TypeScript: `npx tsc --noEmit`; Python: `pytest`; or as specified). If the issue specifies a test file, run that.
 5. **If tests fail**, diagnose and fix before moving on.
 6. **Mark the todo completed.**
 
@@ -52,16 +54,16 @@ For each acceptance criterion:
 
 After all acceptance criteria are addressed:
 
-1. Run the full test suite (or the scope specified in **Test scenario**).
+1. Run the full test/compile check for the affected scope.
 2. Verify every **Hard Invariant** is upheld by reviewing the diff.
-3. If the issue includes a **Test scenario**, follow its steps to manually verify.
+3. If the issue includes a **Test scenario**, follow its steps.
 
 ### 6. Mark issue complete
 
 Update the issue `.md` file:
 
 - Check off every acceptance criterion checkbox (`- [ ]` → `- [x]`).
-- Append a completion block at the bottom of the file:
+- Append a completion block:
 
 ```markdown
 
@@ -72,9 +74,47 @@ Update the issue `.md` file:
 **Status:** Done
 **Date:** YYYY-MM-DD
 **Notes:** <one-line summary of what was done, or "Implemented as specified">
+
+Commit: <type>(<scope>): <short description>
 ```
 
-Confirm to the user that the issue is complete.
+### 7. Update the parent plan
+
+If this issue belongs to a master plan (a `.md` file in the parent directory):
+
+1. Find the corresponding checkboxes in the plan's Priority sections.
+2. Mark them `[x]`.
+3. This keeps the master plan as a live progress dashboard.
+
+### 8. Commit
+
+Stage all changed files (implementation + issue file + plan file) and commit:
+
+```
+<type>(<scope>): <concise title>
+
+- <bullet 1: key change>
+- <bullet 2: key change>
+- ...
+
+Issue: NNN_slug
+```
+
+Commit type mapping:
+| Issue content | type |
+|---|---|
+| New feature | `feat` |
+| Bug fix | `fix` |
+| Refactor | `refactor` |
+| Test-only | `test` |
+| Docs | `docs` |
+
+**Do NOT push.** Commits stay local until user explicitly pushes.
+
+### 9. Report completion
+
+For **AFK** issues: brief one-line confirmation + offer to proceed to next issue.
+For **HITL** issues: present a summary table of changes and wait for user review.
 
 ## Rules
 
@@ -82,5 +122,7 @@ Confirm to the user that the issue is complete.
 - **One criterion at a time.** Do not batch multiple acceptance criteria into a single editing pass. This keeps changes reviewable and rollback-friendly.
 - **Tests must pass.** Never mark a criterion complete if tests are failing.
 - **Respect invariants.** Before marking completion, re-read every Hard Invariant and verify the implementation upholds it.
-- **Do not modify files outside scope.** Only touch files listed in **Files to modify** unless a transitive dependency clearly requires it. If you need to touch an unlisted file, note it in the completion block.
+- **Do not modify files outside scope.** Only touch files listed in **Files to modify** unless a transitive dependency clearly requires it (e.g. fixing a call-site type mismatch). If you need to touch an unlisted file, note it in the completion block.
 - **Preserve issue format.** When updating checkboxes, change only the `[ ]` → `[x]` characters. Do not reformat or rewrite the issue content.
+- **AFK = autonomous.** For AFK issues, do not pause for approval between steps. Implement → test → update issue → update plan → commit → report. One fluid pass.
+- **HITL = pause points.** For HITL issues, pause after presenting the plan and after completion for user review before committing.
