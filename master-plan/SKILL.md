@@ -159,9 +159,13 @@ with this structure:
 - [ ] Action item
 - [ ] Action item
 
+**Issues:** [001](<plan-dir>/001_slug.md), [002](<plan-dir>/002_slug.md)
+
 ---
 
 ## Priority 2: ...
+
+**Issues:** [003](<plan-dir>/003_slug.md)
 
 ---
 
@@ -186,6 +190,31 @@ with this structure:
 
 1. **<Invariant statement>** — <explanation>
 2. ...
+
+---
+
+## Issue Map
+
+**Single source of truth for plan progress.** `/implement-masterplan` reads
+this table to determine execution order and current state.
+
+| # | Title | Type | Session | Blocked by | Priority | Status |
+| - | ----- | ---- | ------- | ---------- | -------- | ------ |
+| 001 | [Title](<plan-dir>/001_slug.md) | AFK | AFK | None | P1 | ⬜ |
+| 002 | [Title](<plan-dir>/002_slug.md) | AFK | AFK | 001 | P1 | ⬜ |
+| 003 | [Title](<plan-dir>/003_slug.md) | HITL | HITL — UX review | 002 | P2 | ⬜ |
+| ... | ... | ... | ... | ... | ... | ... |
+
+### Issue Map Status Legend
+
+| Symbol | Meaning |
+| ------ | ------- |
+| ⬜ | Not started |
+| 🔄 | In progress |
+| ✅ | Completed |
+| ⏸️ | Blocked (dependency not met) |
+| 🔴 | Failed (needs attention) |
+| ⏭️ | Skipped (user chose to skip) |
 ```
 
 #### Hard Invariants — why they matter
@@ -202,21 +231,35 @@ cross-cutting rules that apply to EVERY issue. Unlike acceptance criteria
 ### Phase 6 — Decompose into Issue Files
 
 Create a subdirectory alongside the plan file with the same name (minus `.md`).
-Populate it with numbered issue files — one per vertical slice.
+Populate it with numbered issue files using the `/write-issue` format — one per
+vertical slice.
 
-**Ordering:** issues are numbered in **implementation order**, not priority
-order. Foundational infrastructure comes first (even if it's Priority 3),
-because other issues depend on it. Think of it as a topological sort of
-the dependency graph.
+**Ordering:** Issues are numbered in **implementation order** (topological sort
+of the dependency graph), not priority order. Foundational infrastructure comes
+first (even if it's Priority 3), because other issues depend on it.
+
+**AFK vs HITL classification:**
+
+| Type | Meaning | Implementation session |
+| ---- | ------- | --------------------- |
+| **AFK** | Can be implemented end-to-end without human decisions | Agent works autonomously via `/implement-issue` |
+| **HITL** | Requires a design decision, review, or external input mid-flight | Agent pauses for user input; schedule when user is available |
+
+Classify each issue explicitly. When in doubt, mark HITL — it's safer to pause
+than to guess wrong. Issues that only need code changes with clear specs are
+AFK. Issues involving UX choices, API contracts with external teams, or
+ambiguous requirements are HITL.
 
 **Issue file format:**
 
 ```markdown
 # NNN: <Title>
 
-**Type:** AFK / HITL
-**Blocked by:** <NNN (description)> or "None — can start immediately"
-**Priority:** <N> (<priority section name from the master plan>)
+**Type:** AFK | HITL
+**Blocked by:** NNN (description) | None — can start immediately
+**Priority:** N (Section title from master plan)
+**Plan:** [<plan-name>](../<YYYY-MM-DD>_<app>_<plan-name>.md)
+**Session:** AFK | HITL — <one-line reason>
 
 ---
 
@@ -237,6 +280,15 @@ the dependency graph.
 
 - [ ] Criterion 1
 - [ ] Criterion 2
+
+## Files to modify
+
+- `path/to/file.ext` — what changes in this file
+
+## Test scenario
+
+1. Step-by-step verification
+2. ...
 ```
 
 **Slice rules** (same as `/write-issue`):
@@ -246,23 +298,43 @@ the dependency graph.
 - Prefer many thin slices over few thick ones
 - AFK slices can be implemented without human input
 - HITL slices require a design decision or review
+- Every issue links back to the plan via the **Plan:** field
+
+After creating all issue files, **update the plan document**:
+
+1. Add `**Issues:**` links to each Priority section
+2. Fill the **Issue Map** table at the bottom of the plan
 
 ### Phase 7 — Review with User
 
-Present the issue breakdown as a numbered list with titles, types, and
-blockers. Ask:
+Present the complete plan:
+
+- The governing model and key principles
+- Issue breakdown as a numbered list with titles, types, sessions, and blockers
+- Total action item count and AFK/HITL split
+
+Ask:
 
 - Does the granularity feel right?
 - Are the dependency relationships correct?
 - Should any issues be merged or split?
 - Any missing scenarios or invariants?
+- Are the AFK/HITL classifications correct?
 
-Iterate until approved, then write the files.
+Iterate until approved, then write all files.
+
+Report:
+- The full path to the plan file
+- The full path to the issues directory
+- Number of priority sections
+- Number of issues created (N AFK + M HITL)
+- Total acceptance criteria count
 
 ## Skill Composition
 
-This skill naturally chains with other skills:
+This skill orchestrates other skills:
 
-- **Before:** `/grill-me` can be used during Phase 3 to resolve open questions
-- **After:** `/write-issue` can prepare the issue files for GitHub Issues
-- **During:** `/tdd` can be used when implementing individual issue files
+- **During Phase 3:** Uses `/grill-me` interrogation style to resolve decisions
+- **During Phase 6:** Uses `/write-issue` format for issue files
+- **After completion:** Plan is ready for `/implement-masterplan` to execute
+- **During implementation:** `/tdd` can be used per issue when adding tests
