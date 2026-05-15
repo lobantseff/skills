@@ -80,15 +80,26 @@ Commit: <type>(<scope>): <short description>
 
 ### 7. Update the parent plan
 
-If this issue belongs to a master plan (a `.md` file in the parent directory):
+If this issue belongs to a master plan (check for a **Plan:** field in the issue
+header, or look for a `.md` file in the parent directory):
 
-1. Find the corresponding checkboxes in the plan's Priority sections.
-2. Mark them `[x]`.
-3. This keeps the master plan as a live progress dashboard.
+1. Find the corresponding checkboxes in the plan's Priority sections → mark `[x]`.
+2. Find this issue's row in the **Issue Map** table → change status from `⬜` to `✅`.
+3. Check if any downstream issues (those with `Blocked by: NNN` pointing to this
+   issue) can now be unblocked → change their status from `⏸️` to `⬜` if all
+   their blockers are now `✅`.
+
+This keeps the master plan as a live progress dashboard for `/implement-masterplan`.
 
 ### 8. Commit
 
-Stage all changed files (implementation + issue file + plan file) and commit:
+**Pre-commit checklist (MUST complete ALL before staging):**
+
+1. ✅ All acceptance criteria checkboxes marked `[x]` in the issue file
+2. ✅ `## Completion` block appended to the issue file (see step 6)
+3. ✅ Parent plan updated (if applicable, see step 7)
+
+Only after all three are verified, stage all changed files (implementation + issue file + plan file) and commit:
 
 ```
 <type>(<scope>): <concise title>
@@ -126,3 +137,4 @@ For **HITL** issues: present a summary table of changes and wait for user review
 - **Preserve issue format.** When updating checkboxes, change only the `[ ]` → `[x]` characters. Do not reformat or rewrite the issue content.
 - **AFK = autonomous.** For AFK issues, do not pause for approval between steps. Implement → test → update issue → update plan → commit → report. One fluid pass.
 - **HITL = pause points.** For HITL issues, pause after presenting the plan and after completion for user review before committing.
+- **Never commit without `## Completion`.** The `## Completion` block in the issue file is mandatory. If you are about to run `git commit` and the issue file doesn't have it yet, STOP and add it first.
