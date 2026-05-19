@@ -122,6 +122,8 @@ with this structure:
 **App:** <name>  **Date:** <YYYY-MM-DD>  **Branch:** <branch>
 **Scope:** <what's covered>
 **Constraint:** <immovable constraints, e.g. "server API is immutable">
+**Build command:** `<quick compile/typecheck, e.g. make -j, npx tsc --noEmit>`
+**Test command:** `<full test suite, e.g. make test, npm test, pytest>`
 
 ---
 

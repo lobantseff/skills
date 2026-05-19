@@ -46,15 +46,15 @@ For each acceptance criterion:
 1. **Mark the todo in-progress.**
 2. **Read the relevant files** to understand current state.
 3. **Make the code changes.** Follow the issue's spec closely — do not add unrequested features or refactors.
-4. **Run the relevant tests** (TypeScript: `npx tsc --noEmit`; Python: `pytest`; or as specified). If the issue specifies a test file, run that.
-5. **If tests fail**, diagnose and fix before moving on.
+4. **Run the build command** (from the parent plan's `Build command:` field, or discover: check for Makefile/CMakeLists, package.json, Cargo.toml, pyproject.toml). If the issue's "Test scenario" specifies a different command, use that instead.
+5. **If build fails**, diagnose and fix before moving on.
 6. **Mark the todo completed.**
 
 ### 5. Run full verification
 
 After all acceptance criteria are addressed:
 
-1. Run the full test/compile check for the affected scope.
+1. Run the **full test command** (from the parent plan's `Test command:` field, or discover). Only treat *new* failures as blockers if pre-existing failures were noted.
 2. Verify every **Hard Invariant** is upheld by reviewing the diff.
 3. If the issue includes a **Test scenario**, follow its steps.
 

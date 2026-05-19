@@ -60,6 +60,31 @@ in the plan file between the Issue Map and the end of the document:
 
 Locate the issues subdirectory (same name as plan file minus `.md`).
 
+#### Discover and Validate Test Commands
+
+Extract `Build command:` and `Test command:` from the plan header. If not
+specified, discover them:
+
+1. Check for `Makefile` / `CMakeLists.txt` → `make -j` / `cmake --build build`
+2. Check for `package.json` with scripts → `npm test`, `npx tsc --noEmit`
+3. Check for `Cargo.toml` → `cargo check`, `cargo test`
+4. Check for `pyproject.toml` / `pytest.ini` → `python -m pytest`
+5. If nothing found → ask the user
+
+Once determined, record both commands in the plan file header (so future
+resumptions don't need to re-discover):
+
+```markdown
+**Build command:** `<quick compile/typecheck>`
+**Test command:** `<full test suite>`
+```
+
+Validate by running both commands on the current codebase:
+- If both pass → proceed.
+- If either fails → ask the user: "Tests/build fail on current state before
+  any plan changes. Proceed anyway?" If yes, note the pre-existing failures
+  as baseline. Only treat *new* failures as blockers during implementation.
+
 ### Phase 2 — Build the Execution Order
 
 Read all issue files from the issues directory. For each issue, extract:
@@ -141,12 +166,17 @@ Use `/implement-issue` procedure for each issue:
 2. Check prerequisites (blocked-by)
 3. Plan implementation order across files
 4. Implement acceptance criteria one at a time
-5. Run tests after each criterion
+5. Run **build command** after each criterion (fast feedback)
 6. Mark criteria complete in the issue file
+
+If the issue's "Test scenario" section specifies a different command, use that
+instead of the plan-level build command for this issue.
 
 #### 3e. Commit the Issue
 
-After the issue passes all tests and acceptance criteria are met:
+After all acceptance criteria are met, run the **full test command** before
+committing. If new test failures appear (beyond baseline), diagnose and fix
+before proceeding.
 
 1. Stage all changes: `git add -A`
 2. Create a commit with a structured message:
