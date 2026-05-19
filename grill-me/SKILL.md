@@ -9,4 +9,4 @@ Ask the questions one at a time.
 
 If a question can be answered by exploring the codebase, explore the codebase instead.
 
-After the interview is complete, update the issue type or plan status as "Grilled", for an issue switch it's type to AFK
+After the interview is complete, add `**Grilled:** Yes` to the issue metadata block. Do NOT modify any existing metadata fields (**Type:**, **Session:**, **Priority:**, etc.) — those are set by the plan/issue author and must be preserved as-is.
