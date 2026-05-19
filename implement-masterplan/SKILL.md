@@ -42,10 +42,21 @@ Read the full plan. Extract:
 - **Governing Model** (the conceptual framework — keep in context throughout)
 - **Hard Invariants** (cross-cutting constraints for all issues)
 - **Issue Map** (the table linking to issue files with dependency/status/session)
+- **Implementation Log** (if resuming — the table of what prior issues produced)
 - **Priority sections** (for context on ordering intent)
 - **Resolved Design Decisions** (for reference during implementation)
 - **Out of Scope** (to avoid scope creep)
 - **Conflict Scenarios** (to be aware of edge cases during implementation)
+
+If the plan has no `## Implementation Log` section yet (first run), create it
+in the plan file between the Issue Map and the end of the document:
+
+```markdown
+## Implementation Log
+
+| # | Summary | Key export |
+|---|---|---|
+```
 
 Locate the issues subdirectory (same name as plan file minus `.md`).
 
@@ -94,7 +105,24 @@ For each issue in execution order:
 - If a blocker is not done, skip and move to the next unblocked issue
 - For HITL issues, confirm the user is ready to provide input
 
-#### 3b. Stage Clean Working Tree
+#### 3b. Load Issue Context
+
+Before starting each issue, load exactly:
+
+1. **Governing Model** (from the plan — keep in working memory throughout)
+2. **Issue Map + Implementation Log** (from the plan — current progress and
+   what prior issues produced)
+3. **Current issue file** (the full issue being implemented)
+
+Read additional issue files or plan sections freely if the current context is
+insufficient — the Implementation Log tells you which prior issues are relevant
+and what they exported.
+
+**For plans with 10+ issues:** Avoid loading all issue files preemptively. Use
+the Implementation Log to identify which 1-2 prior issues matter for the
+current one, then read only those.
+
+#### 3c. Stage Clean Working Tree
 
 Before starting each issue, ensure the git working tree is clean:
 
@@ -105,7 +133,7 @@ git status --porcelain
 If there are unstaged changes from a previous issue, commit or stash them
 before proceeding. Each issue gets its own isolated commit.
 
-#### 3c. Execute the Issue
+#### 3d. Execute the Issue
 
 Use `/implement-issue` procedure for each issue:
 
@@ -116,7 +144,7 @@ Use `/implement-issue` procedure for each issue:
 5. Run tests after each criterion
 6. Mark criteria complete in the issue file
 
-#### 3d. Commit the Issue
+#### 3e. Commit the Issue
 
 After the issue passes all tests and acceptance criteria are met:
 
@@ -148,13 +176,31 @@ Where `<type>` is derived from the issue:
 
 3. Do NOT push. Commits stay local until user explicitly pushes.
 
-#### 3e. Update Plan Progress
+#### 3f. Update Plan Progress + Implementation Log
 
-After each issue is committed, update the plan's **Issue Map** table:
+After each issue is committed, update the plan file with two things:
 
-- Change status from `⬜` to `✅`
-- If an issue is in progress, mark `🔄`
-- If blocked by an incomplete issue, mark `⏸️`
+**1. Issue Map** — change status from `⬜` to `✅` (or `🔄` if in progress,
+`⏸️` if blocked by an incomplete issue).
+
+**2. Implementation Log** — append a row to the `## Implementation Log` table
+in the plan file. Write both the issue's Completion block (in the issue file)
+and this log entry at the same time — you have full context right now.
+
+Log entry format:
+
+```markdown
+| NNN | <behavioral summary of what this issue produced> | `<key exported symbol or path>` |
+```
+
+Example:
+
+```markdown
+| 003 | JSON status dual transport (WS broadcast + file write) | `StatusWriter.emitJson()` |
+```
+
+The "Key export" column captures what downstream issues can *use* — a function,
+a type, an endpoint, a file path.
 
 Also check off the corresponding items in the Priority sections of the plan
 if they map to the completed issue's acceptance criteria.
@@ -276,11 +322,13 @@ Each commit is self-contained, tested, and maps 1:1 to a plan issue.
 This skill is designed to be resumable. If a session ends mid-plan:
 
 1. The Issue Map reflects which issues are done (✅) or failed (🔴)
-2. Git history contains commits for all completed issues
-3. Re-invoking `/implement-masterplan` on the same plan picks up where it left
+2. The Implementation Log provides compressed context of what prior issues
+   produced — no need to re-read all completed issue files
+3. Git history contains commits for all completed issues
+4. Re-invoking `/implement-masterplan` on the same plan picks up where it left
    off — completed issues are skipped automatically
-4. The dependency graph is re-evaluated from current state
-5. Use `git log --oneline` to verify which issues have commits
+5. The dependency graph is re-evaluated from current state
+6. Use `git log --oneline` to verify which issues have commits
 
 ## Session Planning
 
