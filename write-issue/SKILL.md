@@ -13,6 +13,8 @@ Write a single structured implementation issue file to the nearest `.plans/` dir
 
 Work from whatever is in the conversation. If the user passes a GitHub issue number/URL, fetch it with `gh issue view`. Explore the codebase with subagents to understand affected files and existing patterns.
 
+While exploring, **discover the repo's own conventions** for the modules you'll touch: read any `CONTRIBUTING.md`, `.github/copilot-instructions.md`, `AGENTS.md`, and guides they link to (including submodule guides under `External/`, `lib/`, `packages/`, etc.). Use them to ground the issue's **Architecture**, **Hard Invariants**, **Files to modify**, and **Test scenario** in the repo's real patterns (namespaces, async/logging/error conventions, test fixtures, test names, build/test commands). Where relevant, point the implementer at the specific guide(s) that apply.
+
 ### 2. Determine placement
 
 Find the nearest `.plans/` directory (or subdirectory) relative to the affected code. If multiple exist, ask the user. Determine the next sequence number by listing existing files (e.g., if `009_*.md` exists, next is `010`).
@@ -126,6 +128,7 @@ Step-by-step manual test instructions (or automated test description) that an im
 
 ## Rules
 
+- **Honor repo conventions.** When a touched module provides `CONTRIBUTING.md`, `.github/copilot-instructions.md`, `AGENTS.md`, or guides they link to, ground the issue's spec in them and reference the relevant guide(s) so the implementer follows them.
 - **One issue per file.** Never combine multiple issues into one file.
 - **Filename format:** `NNN_kebab-case-title.md` (e.g., `005_per-patient-annotator-badge.md`)
 - **No GitHub issue creation.** This skill writes local `.plans/` files only.

@@ -60,16 +60,27 @@ in the plan file between the Issue Map and the end of the document:
 
 Locate the issues subdirectory (same name as plan file minus `.md`).
 
+#### Discover Repo Conventions
+
+Note the plan's **Conventions:** field (if present) and read the guides it
+points to. Also scan the modules in scope for any `CONTRIBUTING.md`,
+`.github/copilot-instructions.md`, `AGENTS.md`, or guides they link to
+(including submodule guides under `External/`, `lib/`, `packages/`, etc.).
+These are binding for all code generated during implementation and override
+the generic defaults below.
+
 #### Discover and Validate Test Commands
 
 Extract `Build command:` and `Test command:` from the plan header. If not
 specified, discover them:
 
-1. Check for `Makefile` / `CMakeLists.txt` → `make -j` / `cmake --build build`
-2. Check for `package.json` with scripts → `npm test`, `npx tsc --noEmit`
-3. Check for `Cargo.toml` → `cargo check`, `cargo test`
-4. Check for `pyproject.toml` / `pytest.ini` → `python -m pytest`
-5. If nothing found → ask the user
+1. Check the touched module's `CONTRIBUTING.md` (Build & Test section) or
+   `.github/copilot-instructions.md` for the canonical commands
+2. Check for `Makefile` / `CMakeLists.txt` → `make -j` / `cmake --build build`
+3. Check for `package.json` with scripts → `npm test`, `npx tsc --noEmit`
+4. Check for `Cargo.toml` → `cargo check`, `cargo test`
+5. Check for `pyproject.toml` / `pytest.ini` → `python -m pytest`
+6. If nothing found → ask the user
 
 Once determined, record both commands in the plan file header (so future
 resumptions don't need to re-discover):
@@ -164,10 +175,13 @@ Use `/implement-issue` procedure for each issue:
 
 1. Read the issue file
 2. Check prerequisites (blocked-by)
-3. Plan implementation order across files
-4. Implement acceptance criteria one at a time
-5. Run **build command** after each criterion (fast feedback)
-6. Mark criteria complete in the issue file
+3. Discover and follow repo conventions — read any `CONTRIBUTING.md`,
+   `.github/copilot-instructions.md`, `AGENTS.md`, or guides they link to for
+   the modules being touched; they override generic defaults
+4. Plan implementation order across files
+5. Implement acceptance criteria one at a time
+6. Run **build command** after each criterion (fast feedback)
+7. Mark criteria complete in the issue file
 
 If the issue's "Test scenario" section specifies a different command, use that
 instead of the plan-level build command for this issue.
@@ -297,6 +311,7 @@ Report to the user:
 
 ## Rules
 
+- **Honor repo conventions.** When a touched module provides `CONTRIBUTING.md`, `.github/copilot-instructions.md`, `AGENTS.md`, or guides they link to (including submodule guides under `External/`, `lib/`, `packages/`, etc.), follow them for all generated code and tests. They override generic defaults when they conflict.
 - **Follow the plan.** The plan document + issue files are the source of truth.
   Do not deviate from the governing model or violate hard invariants.
 - **One issue, one commit.** Each issue gets exactly one commit. This creates

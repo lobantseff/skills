@@ -44,6 +44,12 @@ for breadth. Focus on:
 - Identity / ownership model
 - Existing error handling and edge cases
 - What works today vs what the user thinks is broken
+- **Repo conventions** — read any `CONTRIBUTING.md`,
+  `.github/copilot-instructions.md`, `AGENTS.md`, and guides they link to
+  (including submodule guides under `External/`, `lib/`, `packages/`, etc.).
+  These define the binding patterns (namespaces, async/logging/error rules,
+  test fixtures and names, build/test commands) the plan and its issues must
+  follow.
 
 Don't assume — read the code. The plan must be grounded in actual architecture,
 not guesses.
@@ -124,6 +130,7 @@ with this structure:
 **Constraint:** <immovable constraints, e.g. "server API is immutable">
 **Build command:** `<quick compile/typecheck, e.g. make -j, npx tsc --noEmit>`
 **Test command:** `<full test suite, e.g. make test, npm test, pytest>`
+**Conventions:** `<links to CONTRIBUTING.md / .github/copilot-instructions.md that apply, or "none found">`
 
 ---
 
@@ -301,6 +308,9 @@ ambiguous requirements are HITL.
 - AFK slices can be implemented without human input
 - HITL slices require a design decision or review
 - Every issue links back to the plan via the **Plan:** field
+- Each issue's spec (Architecture, Files to modify, Test scenario) follows the
+  repo conventions captured in the plan's **Conventions:** field; reference the
+  applicable guide(s) where it helps the implementer
 
 After creating all issue files, **update the plan document**:
 

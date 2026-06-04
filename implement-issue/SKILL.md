@@ -29,7 +29,17 @@ Read the full issue. Extract:
 
 If the issue has a **Blocked by** entry that is not marked complete, warn the user and ask whether to proceed anyway. For `AFK` issues, abort unless the user overrides.
 
-### 3. Explore and plan implementation order
+### 3. Discover repo conventions
+
+**Before writing any code, find the repo's own contributor guidance and treat it as binding.** For each module you'll touch, look for and read:
+
+- `CONTRIBUTING.md` in the module root (and any files it links to).
+- `.github/copilot-instructions.md` and `AGENTS.md` at the repo or module level.
+- Composed/nested guides — many repos build their rules from submodules (e.g. under `External/`, `lib/`, `packages/`). Follow the links these files reference and read them too.
+
+If such files exist, follow them for everything you generate: namespaces, async/coroutine patterns, logging, error handling, validation at trust boundaries, naming, header conventions, test fixtures, test names, platform guards, and the build/test commands. When this guidance conflicts with this skill's generic defaults, **the repo's guidance wins**. If no such files exist, fall back to the generic defaults below.
+
+### 4. Explore and plan implementation order
 
 Use subagents or file reads to explore each file listed in **Files to modify**. Then decide on an implementation order that:
 - Starts with the lowest-dependency changes (types, data structures).
@@ -39,26 +49,26 @@ Use subagents or file reads to explore each file listed in **Files to modify**. 
 **AFK issues:** Proceed directly — do not ask for approval.
 **HITL issues:** Present the implementation order and wait for approval.
 
-### 4. Implement — one acceptance criterion at a time
+### 5. Implement — one acceptance criterion at a time
 
 For each acceptance criterion:
 
 1. **Mark the todo in-progress.**
 2. **Read the relevant files** to understand current state.
-3. **Make the code changes.** Follow the issue's spec closely — do not add unrequested features or refactors.
-4. **Run the build command** (from the parent plan's `Build command:` field, or discover: check for Makefile/CMakeLists, package.json, Cargo.toml, pyproject.toml). If the issue's "Test scenario" specifies a different command, use that instead.
+3. **Make the code changes.** Follow the issue's spec closely — do not add unrequested features or refactors. Honor the conventions found in step 3 (namespaces, async/logging/error patterns, naming, tests).
+4. **Run the build command** (from the parent plan's `Build command:` field, the module's `CONTRIBUTING.md` Build & Test section, or discover: check for Makefile/CMakeLists, package.json, Cargo.toml, pyproject.toml). If the issue's "Test scenario" specifies a different command, use that instead.
 5. **If build fails**, diagnose and fix before moving on.
 6. **Mark the todo completed.**
 
-### 5. Run full verification
+### 6. Run full verification
 
 After all acceptance criteria are addressed:
 
-1. Run the **full test command** (from the parent plan's `Test command:` field, or discover). Only treat *new* failures as blockers if pre-existing failures were noted.
+1. Run the **full test command** (from the parent plan's `Test command:` field, the module's `CONTRIBUTING.md`, or discover). Only treat *new* failures as blockers if pre-existing failures were noted.
 2. Verify every **Hard Invariant** is upheld by reviewing the diff.
 3. If the issue includes a **Test scenario**, follow its steps.
 
-### 6. Mark issue complete
+### 7. Mark issue complete
 
 Update the issue `.md` file:
 
@@ -78,7 +88,7 @@ Update the issue `.md` file:
 Commit: <type>(<scope>): <short description>
 ```
 
-### 7. Update the parent plan
+### 8. Update the parent plan
 
 If this issue belongs to a master plan (check for a **Plan:** field in the issue
 header, or look for a `.md` file in the parent directory):
@@ -91,13 +101,13 @@ header, or look for a `.md` file in the parent directory):
 
 This keeps the master plan as a live progress dashboard for `/implement-masterplan`.
 
-### 8. Commit
+### 9. Commit
 
 **Pre-commit checklist (MUST complete ALL before staging):**
 
 1. ✅ All acceptance criteria checkboxes marked `[x]` in the issue file
-2. ✅ `## Completion` block appended to the issue file (see step 6)
-3. ✅ Parent plan updated (if applicable, see step 7)
+2. ✅ `## Completion` block appended to the issue file (see step 7)
+3. ✅ Parent plan updated (if applicable, see step 8)
 
 Only after all three are verified, stage all changed files (implementation + issue file + plan file) and commit:
 
@@ -122,13 +132,14 @@ Commit type mapping:
 
 **Do NOT push.** Commits stay local until user explicitly pushes.
 
-### 9. Report completion
+### 10. Report completion
 
 For **AFK** issues: brief one-line confirmation + offer to proceed to next issue.
 For **HITL** issues: present a summary table of changes and wait for user review.
 
 ## Rules
 
+- **Honor repo conventions.** When a module provides `CONTRIBUTING.md`, `.github/copilot-instructions.md`, `AGENTS.md`, or guides they link to (including submodule guides under `External/`, `lib/`, `packages/`, etc.), read and follow them for all generated code and tests. They override this skill's generic defaults when they conflict.
 - **Follow the spec.** The issue file is the source of truth. Do not deviate from its behavioral description unless something is clearly wrong (in which case, ask).
 - **One criterion at a time.** Do not batch multiple acceptance criteria into a single editing pass. This keeps changes reviewable and rollback-friendly.
 - **Tests must pass.** Never mark a criterion complete if tests are failing.
